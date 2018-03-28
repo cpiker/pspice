@@ -1,0 +1,127 @@
+Prerequisite
+============
+
+Pspice provides python bindings for the NAIF c_spice toolkit.  As such the
+c_spice libraries must already exist on your system.  These can be obtained
+from:
+
+   http://naif.jpl.nasa.gov/naif/toolkit.html
+
+
+Installation
+============
+
+1. Set the enviroment variable CSPICE_INC to point to your top level c_spice
+   header files directory.  If for example the spice library was installed as
+   /usr/local/cspice/  Then CSPICE_INC=/usr/local/cspice/include
+   
+2. Run installation script.  NOTE: See item (4) if installation fails due to
+   missing libary files.  This typically happens on Sun Solaris OS.
+
+  * To install in your home directory under $HOME/lib/python and $HOME/bin:
+   
+    $ python setup.py install --prefix=$HOME
+      
+    and set PYTHONPATH in your .bashrc or .kshrc.
+
+    This will install two files:
+       
+       $HOME/lib/pythonX.X/site-packages/pspice.so
+       $HOME/bin/spiceid
+	 
+	 where X.X represents your python major and minor versions.
+ 
+		 
+  * NOTE to multi-os NFS home directory users:
+  
+    make a directory for each OS sharing your disk space and then install
+	 using:
+	 
+	 $ mkdir $HOME/`uname`
+	 $ python setup.py install --home=$HOME/`uname`
+	 
+	 --or--
+	 
+	 $ python setup.py install --prefix=$HOME/`uname`
+       
+
+  * To install in the standard sys location:
+
+    $ python setup.py install
+   
+    The standard system location varies but on unix it's usually
+    /usr/local/lib/pythonX.X/site-packages or /usr/lib/pythonX.X/site-packages
+    where X.X is your python major and minor versions.  On windows it is
+    usually C:\PythonXX where XX is the python major and minor versions.
+
+    This will install two files, typically at (on unix):
+
+       /usr/local/lib/pythonX.X/site-packages/pspice.so
+       /usr/local/bin/spiceid
+   
+
+3. If you are maintaining a personal stock of python libraries in your home
+   directory, you should set PYTHONPATH in your login shell to point to that
+   location, which is typically $HOME/lib/python.  This way all of your
+   personal python libs will be found automatically when python is invoked.
+
+	Alternate PYTHONPATHs depending on the install option used above are:
+	
+	   PYTHONPATH=$HOME/lib/pythonX.X/site-packages
+		PYTHONPATH=$HOME/`uname`/lib/pythonX.X/site-packages
+
+
+4. Sun Solaris operating systems have their library files spread across
+   a wider range of directories than a typical Linux distribution.  If 
+	installation fails due to an inability to locate needed libraries, then
+	break the installation down into separate build and install steps and
+	add library location paramenters to the build step.  For example:
+	
+	$ python setup.py build_ext -L /opt/csw/lib:/opt/sfw/lib \
+	    -R /opt/csw/lib:/opt/sfw/lib
+	  
+	$ python setup.py install --prefix=$HOME
+	
+	In this example the needed libaries were assumed to be first in 
+	/opt/csw/lib and if they were not found there, /opt/sfw/lib is searched.
+
+
+Testing the Installation
+========================
+
+1. To test the spiceid program, just execute the following command line:
+
+   $ spiceid voyager
+
+   The output should be look like:
+   
+   Type       | Name      | ID 
+   -----------+-----------+----
+   Spacecraft | VOYAGER 2 | -32
+   Spacecraft | VOYAGER 1 | -31
+   2 matches
+
+   If spiceid doesn't run, double check that spiceid was installed in either
+   the system location (probably /usr/local/bin) or in your directory under
+   $HOME/bin.  If the script is present, check it's permission strings to
+   make sure it is executable.
+   
+   Also, make sure the install path for spiceid is listed in the PATH enviroment
+   variable.
+
+
+2. To test the pspice module, print the help documentation by issuing the
+   following commands ($ indicates a shell prompt, >>> indicates the python
+   interperater prompt):
+
+   $ python
+   >>> import pspice
+   >>> help(pspice)
+
+   If you don't see the help docs, or you get an import error something 
+   is not correct.  Check that pspice.so was installed, in either the system
+   site-packages directory, or in your home directory under $HOME/lib/python.
+   Also, if you are installing in your home directory, double check that the
+   PYTHONPATH enviroment variable is set.
+   
+   

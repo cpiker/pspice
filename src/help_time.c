@@ -1,0 +1,151 @@
+char spicehelp_sctiks[] = 
+ "Convert a PARTITIONLESS spacecraft clock format string to number of\n"
+ "\"ticks\".  The result is a DURATION not a time point.  See scencd\n"
+ "for a time point in \"ticks\".  This routine is useful for finding\n"
+ "the tolerance times for ckgp and ckgp_T functions.\n"
+ "\n"
+ "2 Arguments:\n"
+ "   int - NAIF spacecraft ID code. (spacecraft are negative values).\n"
+ "   string - Character representation of a spacecraft clock WITHOUT\n"
+ "      PARTITION NUMBER\n"
+ "\n"
+ "1 Return:\n"
+ "   Number of ticks represented by the clock string without reference\n"
+ "   to the start of the mission\n"
+;
+
+char spicehelp_scencd[] =
+ "Encode character representation of spacecraft clock time into a double\n"
+ "precision representation.\n"
+ "\n"
+ "2 Arguments:\n"
+ "   int - NAIF spacecraft ID code. (spacecraft are negative values).\n"
+ "   string - is the character representation of some spacecraft's clock\n"
+ "      count.  This will have the following general format: \n"
+ "\n"
+ "         \"pp/sclk_string\", or just \"sclk_string\"\n"
+ "\n"
+ "1 Return:\n"
+ "   float - the double precision encoding of sclkch.  The units of encoded\n"
+ "       SCLK are \"ticks since the start of the mission\", where a \"tick\"\n"
+ "       is defined to be the shortest time increment expressible by a\n"
+ "       particular spacecraft's clock.\n" 
+; 
+
+char spicehelp_etcal[] = 
+ "Convert from an ephemeris epoch measured in seconds past the epoch of\n"
+ "J2000 to a calendar string format using a formal calendar free of\n"
+ "leapseconds.\n"
+ "\n"
+ "1 Argument:\n"
+ "   float - Ephemeris time measured in seconds past J2000\n"
+ "\n"
+ "Return Value:\n"
+ "   string - A standard calendar representation of Ephemeris time in the\n"
+ "      format:\n"
+ "\n"
+ "         year (era) mon day, hr:mn:sc.sss\n"
+;
+
+char spicehelp_et2utc[] = 
+ "Convert an input time from ephemeris seconds past J2000 to Calendar,\n"
+ "Day-of-Year, or Julian Date format, UTC.\n"
+ "3 Arguments:\n"
+ "   float - Input epoch, given in ephemeris seconds past J2000.\n"
+ "   string - Format of output epoch one of \"C\", \"D\", \"J\", \"ISOC\", \"ISOD\".\n"
+ "   int - Digits of precision in fractional seconds or days (0 to 14).\n"
+ "1 Return:\n"
+ "   string - Output time string, UTC."
+;
+
+char spicehelp_sce2s[] = 
+ "Convert an epoch specified as ephemeris seconds past J2000 (ET) to a\n"
+ "character string representation of a spacecraft clock value (SCLK).\n"
+ "2 Arguments:\n"
+ "   int - NAIF spacecraft ID code. (spacecraft are negative values).\n"
+ "   float - Ephemeris time, specified as seconds past J2000.\n"
+ "1 Return:\n"
+ "   string - A SCKL string."
+;
+
+char spicehelp_scs2e[] = 
+ "Convert a spacecraft clock string to ephemeris seconds past J2000 (ET).\n"
+ "2 Arguments:\n"
+ "   int - NAIF spacecraft ID code. (spacecraft are negative values).\n"
+ "   string - input sclk with partition: example: 2/2000:83:12\n"
+ "1 Return:\n"
+ "   float - Ephemeris time, specified as seconds past J2000."
+;
+
+char spicehelp_sce2c[] = 
+ "Convert ephemeris seconds past j2000 (ET) to continuous encoded\n"
+ "spacecraft clock (`ticks').  Non-integral tick values may be returned.\n"
+ "\n"
+ "2 Arguments:\n"
+ "   int - NAIF spacecraft ID code.  (spacecraft are negative values).\n"
+ "   float - Ephemeris time, seconds past J2000.\n"
+ "1 Return:\n"
+ "   SCLK, encoded as ticks since spacecraft clock start.  sclkdp need\n"
+ "   not be integral.\n"
+;
+
+char spicehelp_str2et[] = 
+"Convert a string representing an epoch to a double precision value\n"
+"representing the number of TDB seconds past the J2000 epoch corresponding to\n"
+"the input epoch.\n"
+"\n"
+"1 Argument:\n"
+"  a string representing an epoch.  Virtually all common calendar\n"
+"  representations are allowed. You may specify a time string belonging to any\n"
+"  of the systems TDB, TDT, UTC.  Moreover, you may specify a time string\n"
+"  relative to a specific UTC based time zone.\n"
+"\n"  
+"  The rules used in the parsing of `str' are spelled out in great detail in\n"
+"  the CSPICE routine tpartv\n"
+"\n"
+"1 Return:\n"
+"  A double precision number of TDB seconds past the J2000 epoch that\n"
+"  corresponds to the input\n"
+"\n";
+
+char spicehelp_utc2et[] = 
+ "Convert an input time from Calendar or Julian Date format, UTC, to ephemeris\n"
+ "seconds past J2000.\n"
+ "1 Argument:\n"
+ "   string - input time, can be a Calendar or Julian Date, UTC.\n"
+ "1 Return:\n"
+ "   float - Output epoch, ephemeris seconds past J2000."
+;
+
+char spicehelp_deltet[] = 
+ "Return the value of Delta ET (ET-UTC) for an input epoch.\n"
+ "\n"
+ "2 Arguments:\n"
+ "   float - The epoch at which \"delta ET\" is to be computed.  'epoch' may\n"
+ "      be either UTC or ephemeris seconds past J2000, as specified by the\n"
+ "      2nd argument.\n"
+ "\n"
+ "   string - Indicates the type of input epoch, it may be either of the\n"
+ "      following:\n"
+ "      \"UTC\"  (UTC seconds past J2000 UTC.\n"
+ "      \"ET\"  Ephemeris seconds past J2000 TDB, also known as barycentric\n"
+ "              dynamical time (TDB).\n"
+ "\n"
+ "1 Return:\n"
+ "   float - is the value of:\n"
+ "\n"        
+ "     \"delta ET\" = ET - UTC\n"
+ "\n"
+ "   at the input epoch. This is added to UTC to give ET, or subtracted from\n"
+ "   ET to give UTC. The routine is reversible: that is, given the following\n"
+ "   calls,\n"
+ "\n"
+ "      del1 = deltet(utc, \"UTC\")\n"
+ "      del2 = deltet(utc+del1, \"ET\")\n"
+ "\n"
+ "   the expression\n"
+ "\n"
+ "      ( del1 == del2 )\n"
+ "\n"
+ "   is true.\n"
+;

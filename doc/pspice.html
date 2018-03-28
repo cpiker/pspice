@@ -1,0 +1,1095 @@
+<h2>Module docs for pspice Version 0.4</h2>
+
+
+<p>The following information mostly defines the call interface, see the
+documents for the C-spice toolkit for detailed information.  The required
+readings in the spice are indespensible in understanding how to use the
+library.  The following documentation was generated using the python
+interperater itself, by issuing the commands:</p>
+
+<p><tt>
+$ python<br />
+>>> import pspice<br />
+>>> help(pspice)<br />
+</tt></p>
+
+<h4>Function Index</h4>
+<p>
+<a href="#axisar">axisar</a> &nbsp; <a href="#bodc2n">bodc2n</a> &nbsp;
+<a href="#bodn2c">bodn2c</a> &nbsp; <a href="#bodvrd">bodvrd</a> &nbsp;
+<a href="#ckgp">ckgp</a> &nbsp; <a href="#ckgp_T">ckgp_T</a> &nbsp;
+<a href="#clpool">clpool</a> &nbsp; <a href="#deltet">deltet</a> &nbsp;
+<a href="#dpr">dpr</a> &nbsp; <a href="#et2lst">et2lst</a> &nbsp;
+<a href="#et2utc">et2utc</a> &nbsp; <a href="#etcal">etcal</a> &nbsp;
+<a href="#furnsh">furnsh</a> &nbsp; <a href="#ilumin">ilumin</a> &nbsp;
+<a href="#kclear">kclear</a> &nbsp; <a href="#ktotal">ktotal</a> &nbsp;
+<a href="#ldpool">ldpool</a> &nbsp; <a href="#lspcn">lspcn</a> &nbsp;
+<a href="#m2q">m2q</a> &nbsp; <a href="#pxform">pxform</a> &nbsp;
+<a href="#reclat">reclat</a> &nbsp; <a href="#recpgr">recpgr</a> &nbsp;
+<a href="#reset">reset</a> &nbsp; <a href="#sce2c">sce2c</a> &nbsp;
+<a href="#sce2s">sce2s</a> &nbsp; <a href="#scencd">scencd</a> &nbsp;
+<a href="#scs2e">scs2e</a> &nbsp; <a href="#sctiks">sctiks</a> &nbsp;
+<a href="#spkez">spkez</a> &nbsp; <a href="#spkezr">spkezr</a> &nbsp;
+<a href="#spkpos">spkpos</a> &nbsp; <a href="#str2et">str2et</a> &nbsp;
+<a href="#subpnt">subpnt</a> &nbsp; <a href="#subslr">subslr</a> &nbsp;
+<a href="#tkvrsn">tkvrsn</a> &nbsp; <a href="#unload">unload</a> &nbsp;
+<a href="#utc2et">utc2et</a> &nbsp; <a href="#vminus">vminus</a> &nbsp;
+<a href="#vnorm">vnorm</a>
+</p>
+
+<hr />
+
+<pre>
+<b>NAME</b>
+    pspice
+
+<b>FILE</b>
+    pspice.so
+
+<b>DESCRIPTION</b>
+    Python wrappers for NAIF spice toolkit: http://naif.jpl.nasa.gov/naif/
+    Cobbled together by chris-piker@uiowa.edu.  These are not offical, so
+    please DON'T BUG JPL for python wrapper info!
+    
+    Note:  Unlike the native spice toolkit, NONE of these functions modify
+    there input values, instead all results are returned as values.  Tuples
+    or arrays are used to return multiple values if need be.
+
+<b>CLASSES</b>
+    class error(exceptions.StandardError)
+	    Exception type thrown when C-SPICE failed_c() returns true.
+
+
+<b>FUNCTIONS</b>
+    <b><a name="axisar">axisar</a>(...)</b>
+        Construct a rotation matrix that rotates vectors by a specified angle about
+        a specified axis. 
+        
+        2 Arguments:
+           axis (3-elements) - The (x, y, z) values representing a vector in
+              cartesian space.  The axis item may also be anything else that has 3
+              indexed components such as a tuple, list, 1-dimensional array,
+              single column matrix or single row maxtrix.
+        
+           angle - The rotaiton angle in radians. Not. that all spice rotation
+              angles follow the "right hand rule", so counterclockwise rotations
+              about an axis have positive measure."
+        
+        1 Return:
+           rotation - A 3 by 3 numpy array of floating point rotation coefficients.
+              Array indicies are row-major.  Thus the first index indicates the
+              matrix row, the second is the column, i.e. M[row][column].
+    
+    <b><a name="bodc2n">bodc2n</a>(...)</b>
+        Translate the SPICE integer code of a body into a common name for that body.
+        1 Argument:
+          int - Integer ID code to be translated into a name.
+        1 Return:
+          string - A common name for the body
+    
+    <b><a name="bodn2c">bodn2c</a>(...)</b>
+        Translate the name of a body or object to the corresponding SPICE integer
+        ID code.
+        1 Argument:
+          string - Body name to be translated into a SPICE ID code.
+        1 Return:
+          int - SPICE integer ID code for the named body.
+    
+    <b><a name="bodvrd">bodvrd</a>(...)</b>
+        Return float values from the kernel pool
+        2 Manditory arguments:
+          string - name or id (as a string) for a body, not case sensitive
+          string - short name of a body value, such as 'RADII' not BODY599_RADII'
+        1 Optional argument:
+          int - size of internal array for kernel values defaults to 26
+        1 Return:
+          list - a python list of the returned variables
+    
+    <b><a name="ckgp">ckgp</a>(...)</b>
+        Get pointing (attitude) for a specified spacecraft clock time.
+        
+        4 Arguments:
+           id (int) - NAIF ID of instrument, spacecraft, or structure.
+        
+           sclkdp (float) - The encoded spacecraft clock time for which pointing
+              is being requested.  The routines scencd and sce2c respectively
+              convert spacecraft clock strings and ephemeris time to encoded
+              spacecraft clock.
+        
+           tol (float) - The time tolerance in ticks, the units of encoded
+              spacecraft clock time.  The routine sctiks converts a
+              spacecraft clock tolerance duration from its character string
+              representation to ticks.
+        
+           ref (string) - The desired reference frame for the returned pointing.
+        
+        2 Returns:
+           None - If a record was not found to satisfy the request None is
+             otherwise a 2-tuple of the following items is returned:
+        
+           cmat (3X3 tuple) - is a rotation matrix that transforms components of a
+              vector  expressed in the frame specified by `ref' to components
+              expressed in the frame tied to the instrument, spacecraft, or
+              other structure at time `clkout' (see below).
+        
+              NOTE: cmat is in ROW-MAJOR order, thus cmat[0][2] is the 1st row
+              and the 3rd column.  The row index is first, column index is second.
+        
+              Thus, if a vector v has components x,y,z in the `ref' reference
+              frame, then v has components x',y',z' in the instrument fixed frame
+              at time `clkout':
+        
+                    [ x' ]     [          ] [ x ] 
+                    | y' |  =  |   cmat   | | y | 
+                    [ z' ]     [          ] [ z ] 
+        
+              If you know x', y', z', use the transpose of the C-matrix to
+              determine x, y, z as follows: 
+        
+                    [ x ]      [          ]T    [ x' ] 
+                    | y |  =   |   cmat   |     | y' | 
+                    [ z ]      [          ]     [ z' ] 
+                               (Transpose of cmat) 
+        
+           clkout (float) - the encoded spacecraft clock time associated with
+               the returned C-matrix. This value may differ from the requested
+               time, but never by more than the input tolerance `tol'.
+    
+    <b><a name="ckgp_T">ckgp_T</a>(...)</b>
+        Same as ckgp, except cmat is transposed prior to returning.
+    
+    <b><a name="clpool">clpool</a>(...)</b>
+        Remove all variables from the kernel pool.
+        Returns: None
+    
+    <b><a name="deltet">deltet</a>(...)</b>
+        Return the value of Delta ET (ET-UTC) for an input epoch.
+        
+        2 Arguments:
+           float - The epoch at which "delta ET" is to be computed.  'epoch' may
+              be either UTC or ephemeris seconds past J2000, as specified by the
+              2nd argument.
+        
+           string - Indicates the type of input epoch, it may be either of the
+              following:
+              "UTC"  (UTC seconds past J2000 UTC.
+              "ET"  Ephemeris seconds past J2000 TDB, also known as barycentric
+                      dynamical time (TDB).
+        
+        1 Return:
+           float - is the value of:
+        
+             "delta ET" = ET - UTC
+        
+           at the input epoch. This is added to UTC to give ET, or subtracted from
+           ET to give UTC. The routine is reversible: that is, given the following
+           calls,
+        
+              del1 = deltet(utc, "UTC")
+              del2 = deltet(utc+del1, "ET")
+        
+           the expression
+        
+              ( del1 == del2 )
+        
+           is true.
+    
+    <b><a name="dpr">dpr</a>(...)</b>
+        Get the number of degrees per radian.
+        No Arguments
+        1 Return:
+          180.0/pi, where pi is determined by the acos function.  That is,
+        
+             dpr = 180.0 / acos ( -1.0 )
+    
+    <b><a name="et2lst">et2lst</a>(...)</b>
+        Given an ephemeris epoch, compute the local solar time for an object on
+        the surface of a body at a specified longitude.
+        
+        Brief IO:
+           (hour, min, sec, timestr, ampm) = et2lst(et, body, long, longtype)
+        
+        4 Arguments:
+           float - The epoch expressed in TDB seconds past the J2000 epoch at
+              which a local time is desired.
+        
+           int - NAIF body ID code on which local time is to be measured
+        
+           float - is the longitude (either planetocentric or planetographic)
+             in radians of the site on the surface of body for which local time
+             should be computed.
+        
+           string - Form of longitude supplied, either 'PLANETOCENTRIC' or
+              ' PLANETOGRAPHIC' (case is insignificant).
+        
+        4-tuple return:
+        
+           int - The local "hour" of the site specified at the epoch 'et'. Note
+              that an "hour" of local time does not have the same duration as an
+              hour measured by conventional clocks.  It is simply a representation
+              of an angle.
+        
+           int - The number of "minutes" past the hour of the local time of the
+              site at the epoch `et'. Again note that a "local minute" is not the
+              same as a minute you would measure with conventional clocks.
+        
+           int - The number of "seconds" past the minute of the local time of the
+              site at the epoch `et'.  Again note that a "local second" is not
+              the same as a second you would measure with conventional clocks.
+        
+           string - The local time on a "24 hour" local clock.
+        
+           string - The local time on a "12 hour" AM/PM label clock.
+        
+        NOTE: See the SPICE API docs for details regarding planeographic longitude.
+    
+    <b><a name="et2utc">et2utc</a>(...)</b>
+        Convert an input time from ephemeris seconds past J2000 to Calendar,
+        Day-of-Year, or Julian Date format, UTC.
+        3 Arguments:
+           float - Input epoch, given in ephemeris seconds past J2000.
+           string - Format of output epoch one of "C", "D", "J", "ISOC", "ISOD".
+           int - Digits of precision in fractional seconds or days (0 to 14).
+        1 Return:
+           string - Output time string, UTC.
+    
+    <b><a name="etcal">etcal</a>(...)</b>
+        Convert from an ephemeris epoch measured in seconds past the epoch of
+        J2000 to a calendar string format using a formal calendar free of
+        leapseconds.
+        
+        1 Argument:
+           float - Ephemeris time measured in seconds past J2000
+        
+        Return Value:
+           string - A standard calendar representation of Ephemeris time in the
+              format:
+        
+                 year (era) mon day, hr:mn:sc.sss
+    
+    <b><a name="furnsh">furnsh</a>(...)</b>
+        Load a SPICE meta-kernel file into a program.
+        1 Argument:
+           string - Name of the meta kernel file. 
+        Returns: None
+    
+    <b><a name="ilumin">ilumin</a>(...)</b>
+        Find the illumination angles (phase, solar incidence, and emission) at a
+        specified surface point of a target body.
+        
+        Note: See extended help for the ilumin_c function in the cspice documentation
+        
+        7 ARGUMENTS
+        
+          string - Computation method. Currently only 'ellipsoid' is supported
+         (method)
+        
+          string - Target body name (or NAIF ID)
+         (target)
+        
+          float  - J2000 epoch time at which the apparent illumination angles at the
+           (et)    specified surface point on the target body, as seen from the
+                   observing body, are to be computed.
+        
+          string - The name of the body-fixed, body-centered reference frame 
+         (fixref)  associated with the target body. The input surface point and the
+                   output vector are expressed relative to this reference frame.
+        
+          string - Is the aberration correction to be used in computing the position
+         (abcorr)  and orientation of the target body and the location of the Sun.
+        
+          string - Is the name of the observing body.  This is typically a spacecraft,
+         (obsrvr)  the earth, or a surface point on the earth.
+        
+          3-tuple - Surface point on the target body, expressed in Cartesian
+         (spoint)  coordinates, relative to the body-fixed target frame designated by
+                   the 4th argument above.
+        
+                   The surface point need not be visible from the observer's 
+                   location at the epoch time.  The components of this tuple have
+                   units of km.
+        
+        5 RETURNS:
+        
+          float -  The 'surface point point epoch' defined as follows: letting 'lt'
+         (trgepc)  be the one-way light time between the observer and the surface
+                   point, this value is either the epoch 'et-lt' or 'et' depending on
+                   whether the requested aberration correction is for received
+                   radiation or omitted.  Output is in seconds past J2000 TDB.
+        
+          3-tuple  The vector from the observers position to the surface position
+         (srfvec)  in the body frame provided as input.  See CSpice documentation
+                   for details on light time corrections.
+        
+          float -  The angle at the surface point between the observer-surface line
+         (phase)   and the sun-surfac line.  Output is in radians from 0 to PI.
+        
+          float -  The angle between the surface normal vector and the surface
+         (solar)   point - sun line.  Output is in radians from 0 to PI.
+        
+          float -  The angle between the surface normal vector and the surface
+         (emissn)  point - observer line. Output is in radians from 0 to PI.
+    
+    <b><a name="kclear">kclear</a>(...)</b>
+        Clear the KEEPER system:  unload all kernels, clear the kernel pool, and
+        re-initialize the system.
+        
+        This entry point allows you re-initialize the KEEPER system with a single
+        call.  The KEEPER system is the kernel management system underlying the set
+        of CSPICE APIs:
+        
+           furnsh
+           ktotal
+           kdata
+           kinfo
+           kclear
+           unload
+        
+        This routine unloads all kernels from their kernel-type-specific kernel
+        management subsystems (SPKBSR, CKBSR, etc.), clears the kernel pool, clears
+        KEEPER's internal file database, and re-sets the watch status for the kernel
+        variables used to load kernels via meta-kernels.
+        
+        No Arguments
+        :
+        No returns - Operates by side effects, see notes above.
+    
+    <b><a name="ktotal">ktotal</a>(...)</b>
+        Get the current number of kernels that have been loaded of a specified type
+        
+        1 Argument:
+           string - Kind of kernels to count, a space separated string consisting
+              of one or more of the following words:
+              SPK  --- All SPK files are counted in the total.
+              CK   --- All CK files are counted in the total.
+              PCK  --- All binary PCK files are counted in the total.
+              EK   --- All EK files are counted in the total.
+              TEXT --- All text kernels that are not meta-text kernels are included
+                       in the total.
+              META --- All meta-text kernels are counted in the total.
+              ALL  --- Every type of kernel is counted in the total.
+        
+           exampe input value: 'SPK PCK CK'
+        
+        Returns: int
+    
+    <b><a name="ldpool">ldpool</a>(...)</b>
+        Load the variables contained in a NAIF ASCII kernel file into the kernel pool.
+        1 Argument:
+           string - Name of the kernel file. 
+        Returns: None
+    
+    <b><a name="lspcn">lspcn</a>(...)</b>
+        Compute L_s, the planetocentric longitude of the sun, as seen from a
+        specified body.
+        
+        3 ARGUMENTS
+          body   (string)  Name of central body
+          et     (float)   Epoch in seconds past J2000 TDB
+          abcorr (string)  Aberration correction
+        
+        1 RETURN (float)
+        
+          The function returns the planetocentric longitude of the sun, often called
+          'L_s', for the specified body at the specified time. This is the longitude
+          of the body-sun vector in a right-handed frame whose basis vectors are
+          defined as follows:
+        
+            - The positive Z direction is given by the instantaneous angular velocity
+              vector of the orbit of the body about the sun. 
+        
+            - The positive X direction is that of the cross product of the 
+              instantaneous north spin axis of the body with the positive Z direction.
+        
+            - The positive Y direction is Z x X.
+        
+          Units are radians; the range is 0 to 2*pi.  Longitudes are positive to the
+          east.
+    
+    <b><a name="m2q">m2q</a>(...)</b>
+        Find a unit quaternion corresponding to a specified rotation matrix.
+        
+        1 Argument:
+           rotation (3x3 elements) - A rotation matrix, may be any 3x3 element item
+              such as a 3-tuple of 3-tuple, a two dimensional array, or matrix
+        
+        1 Return:
+           quaternion - A unit-length SPICE-style quaternion representing the
+              rotation.  The quaternion is a rank 1, 4-element array.  With the
+              following correspondence to the rotation matrix.
+        
+              If 'r' rotates vectors in the counterclockwise sense by an angle of
+              'ϴ' radians about a unit vector 'a', where:
+        
+                 0 ≤ θ ≤ π
+        
+              then letting h = θ/2,
+        
+                 q = ( cos(h), sin(h)a₁,  sin(h)a₂,  sin(h)a₃ ).
+        
+              The restriction that 'θ' must be in the range [0, π] determines the
+              output quaternion 'q' uniquely except when θ = π; in this special case,
+              both of the quaternions:
+        
+                 q = ( 0, a₁, a₂, a₃)
+        
+              and
+        
+                 q = ( 0, -a₁, -a₂, -a₃)
+        
+              are possible outputs.
+    
+    <b><a name="pxform">pxform</a>(...)</b>
+        Return the matrix that transforms position vectors from one specified frame
+           to another at a specified epoch.
+        
+        3 Arguments:
+           from (string) - The name of a reference from in which a position vector
+              is known
+        
+           to (string) - The name of a reference frame in which it is desired to
+              represent a position vector.
+        
+           et (float) - is the epoch in ephemeris seconds past the epoch of J2000
+              (TDB) at which the position transformation matrix 'rotate' should be
+              evaluated.
+        
+        1 Return:
+           rotate (3x3 elements) - the matrix that transforms position vectors from
+              the reference frame 'from' to the frame 'to' at epoch 'et'.
+        
+              If (x, y, z) is a position relative to the frame 'from' then the vector
+              ( x', y', z') is the same position relative to the frame 'to' at epoch
+              'et'.  Here the vector ( x', y', z') is defined by the equation:
+        
+                  -   -       -        -     -  -
+                 | x'  |     |          |   | x  |
+                 | y'  |  =  |  rotate  |   | y  |
+                 | z'  |     |          |   | z  |
+                  -   -       -        -     -  -
+    
+    <b><a name="reclat">reclat</a>(...)</b>
+        Convert from rectangular coordinates to latitudinal coordinates.
+        1 Argument:
+          3-tuple - (X,Y,Z) The rectangular coordinates of the input point.
+        
+        1 Return:
+          3-tuple - (Radius, Longitude, Latitude)
+             Radius -  Distance of the point from the origin.  The units associated
+                with Radius are those associated with the input.
+        
+             Longitude - Longitude of the input point.  This is angle between the
+                prime meridian and the meridian containing `rectan'.  The direction
+                of increasing longitude is from the +X axis towards the +Y axis.
+                Longitude is output in radians in the range [-pi, pi].
+        
+             Latitude - Latitude of the input point.  This is the angle from the XY
+                plane of the ray from the origin through the point.  Latitude is
+                output in radians in the range [-pi/2, pi/2].
+        
+           Note 1: If the X and Y components of `rectan' are both zero, the
+              longitude
+         is set to zero.
+        
+           Note 2: If `rectan' is the zero vector, longitude and latitude are both
+              set to zero.
+    
+    <b><a name="recpgr">recpgr</a>(...)</b>
+        Convert rectangular coordinates to planetographic coordinates.
+        
+        4 Arguments:
+           string - Name of the body, case insensitve may use id as a string
+           3-tuple - (X,Y,Z) coordinates of a point (usually in rotating frame)
+           float - Equatorial radius of a reference spheroid.
+           float - Flattening coefficient = (Req - Rpole) / Req
+        
+        3 Returns:
+           float - Planetographic longitude of the input point.  Longitude
+              increases to the east for retrograde planets and the earth, sun,
+              and moon.  Longitude increases to the west for all other bodies.
+           float - Planetographic latitude of the input point in radians. eq = 0
+           float - Altitude of point above the reference spheroid
+        
+        WARNING: Kernel variables of the type BODY<body ID>_PGR_POSITIVE_LON
+           can be used to change the direction of positive longitude for any
+           body
+    
+    <b><a name="reset">reset</a>(...)</b>
+        Reset the internal error status to a value of "no error."  A call to reset
+        is required if spice routines are to be used after a spice.error has been
+        thrown.  Otherwise all spice calls will just throw exceptions.
+        Returns: None
+    
+    <b><a name="sce2c">sce2c</a>(...)</b>
+        Convert ephemeris seconds past j2000 (ET) to continuous encoded
+        spacecraft clock (`ticks').  Non-integral tick values may be returned.
+        
+        2 Arguments:
+           int - NAIF spacecraft ID code.  (spacecraft are negative values).
+           float - Ephemeris time, seconds past J2000.
+        1 Return:
+           SCLK, encoded as ticks since spacecraft clock start.  sclkdp need
+           not be integral.
+    
+    <b><a name="sce2s">sce2s</a>(...)</b>
+        Convert an epoch specified as ephemeris seconds past J2000 (ET) to a
+        character string representation of a spacecraft clock value (SCLK).
+        2 Arguments:
+           int - NAIF spacecraft ID code. (spacecraft are negative values).
+           float - Ephemeris time, specified as seconds past J2000.
+        1 Return:
+           string - A SCKL string.
+    
+    <b><a name="scencd">scencd</a>(...)</b>
+        Encode character representation of spacecraft clock time into a double
+        precision representation.
+        
+        2 Arguments:
+           int - NAIF spacecraft ID code. (spacecraft are negative values).
+           string - is the character representation of some spacecraft's clock
+              count.  This will have the following general format: 
+        
+                 "pp/sclk_string", or just "sclk_string"
+        
+        1 Return:
+           float - the double precision encoding of sclkch.  The units of encoded
+               SCLK are "ticks since the start of the mission", where a "tick"
+               is defined to be the shortest time increment expressible by a
+               particular spacecraft's clock.
+    
+    <b><a name="scs2e">scs2e</a>(...)</b>
+        Convert a spacecraft clock string to ephemeris seconds past J2000 (ET).
+        2 Arguments:
+           int - NAIF spacecraft ID code. (spacecraft are negative values).
+           string - input sclk with partition: example: 2/2000:83:12
+        1 Return:
+           float - Ephemeris time, specified as seconds past J2000.
+    
+    <b><a name="sctiks">sctiks</a>(...)</b>
+        Convert a PARTITIONLESS spacecraft clock format string to number of
+        "ticks".  The result is a DURATION not a time point.  See scencd
+        for a time point in "ticks".  This routine is useful for finding
+        the tolerance times for ckgp and ckgp_T functions.
+        
+        2 Arguments:
+           int - NAIF spacecraft ID code. (spacecraft are negative values).
+           string - Character representation of a spacecraft clock WITHOUT
+              PARTITION NUMBER
+        
+        1 Return:
+           Number of ticks represented by the clock string without reference
+           to the start of the mission
+    
+    <b><a name="spkez">spkez</a>(...)</b>
+        NOTE: See Expanded help in spice docs for more information.
+        
+        Return the state (position and velocity) of a target body 
+        relative to an observing body, optionally corrected for light 
+        time (planetary aberration) and stellar aberration. 
+        
+        5 Arguments:
+        
+           int     the NAIF ID code for a target body.  The target and observer
+                   define a state vector whose position component points from the
+                   observer to the target.
+        
+           float   the ephemeris time at observers location, expressed as
+                   seconds past J2000 
+        
+           string  the name of the reference frame relative in which the output state
+                   vector should be expressed.  Use J2000 to get an inertial frame.
+        
+           string  indicates the aberration corrections to be applied to the state of
+                   the target body to account for one-way light time and stellar
+                   aberration, May be any of the following: 'NONE', 'LT', 'LT+S'
+                   'CN', 'CN+S', 'XLT', 'XLT+S', 'XCN', or 'XCN+S'.
+        
+           int     the NAIF ID code for an observing body. 
+        
+        2 RETURNS:
+        
+           array(6) a Cartesian state vector representing the position and velocity of
+                   the target body relative to the specified observer. The first 
+                   three components of `starg' represent the x-, y- and z-components
+                   of the target's position; the last three components form the
+                   corresponding velocity vector. 
+        
+                   Units are always km and km/sec.
+        
+           float   is the one-way light time between the observer and target in
+                   seconds. If the target state is corrected for aberrations, then
+                   this is the one-way light time between the observer and the light
+                   time corrected target location.
+    
+    <b><a name="spkezr">spkezr</a>(...)</b>
+        Return the state (position and velocity) of a target body relative to an
+        observing body, optionally corrected for light time (planetary aberration)
+        and stellar aberration.
+        
+        This function is essentially the same as spkez, except that the target and
+        observer may be specified as strings instead of integers id codes
+        
+        5 ARGUMENTS
+          string  The name of a target body. Optionally, you may supply the integer
+                  ID code for the object as an integer string. For example both 
+                  'MOON' and '301' are legitimate strings that indicate the moon is
+                  the target body.
+        
+          float   the ephemeris time at observers location, expressed as
+                  seconds past J2000 
+        
+          string  the name of the reference frame relative in which the output state
+                  vector should be expressed.  Use J2000 to get an inertial frame.
+        
+          string  indicates the aberration corrections to be applied to the state of
+                  the target body to account for one-way light time and stellar
+                  aberration, May be any of the following: 'NONE', 'LT', 'LT+S'
+                  'CN', 'CN+S', 'XLT', 'XLT+S', 'XCN', or 'XCN+S'.
+        
+          string  The name of the observing body, for exmaple 'Mars Express', may
+                  specify a NAIF id as as string.
+    
+    <b><a name="spkpos">spkpos</a>(...)</b>
+        Return the position of a target body relative to an observing body, optionally
+        corrected for light time (planetary aberration) and stellar aberration.
+        
+        The target and observer define a position vector which points from the
+        observer to the target.  The vminus() function may be used to reverse to
+        position vector
+        
+        5 Arguments:
+        
+           target (string) - the name of a target body.  Optionally, you may supply
+              the integer ID code for the object as a string.  For example both "MOON"
+              and "301" are legitimate strings that indicate the moon is the target
+              body.
+        
+           et (float) - the ephemeris time, expressed as seconds past J2000 TDB, at
+              which the position of the target body relative to the observer is to be
+              computed.  'et' refers to time at the observer's location.
+        
+           frame (string) - the name of the reference frame relative to which the output
+              position vector should be expressed. This may be any frame supported by
+              the SPICE system, including built-in frames (documented in the Frames
+              Required Reading) and frames defined by a loaded frame kernel (FK).
+        
+              When 'frame' designates a non-inertial frame, the orientation of the frame
+              is evaluated at an epoch dependent on the selected aberration correction.
+              See the description of the output position vector 'postarg' for details.
+        
+           abcorr (string) - indicates the aberration corrections to be applied to the
+              position of the target body to account for one-way light time and stellar
+              aberration.  See the discussion in the NAIF doucmentation for the
+              spkpos_c() function for recommendations on how to choose aberration
+              corrections.
+        
+              Neither special nor general relativistic effects are accounted for in the
+              aberration corrections applied by this routine.
+        
+              Case and blanks are not significant in the string 'abcorr'.
+        
+              'abcorr' may be any of the following:
+        
+                 "NONE" - Apply no correction. Return the  geometric position of the
+                    target body relative to the observer.
+        
+              The following values of 'abcorr' apply to the "reception" case in which
+              photons depart from the target's location at the light-time corrected
+              epoch: (et - lt) and *arrive* at the observer's location at 'et':
+        
+                 "LT" - Correct for one-way light time (also called "planetary
+                   aberration") using a Newtonian formulation. This correction yields
+                   the position of the target at the moment it emitted photons arriving
+                   at the observer at `et'.
+        
+                   The light time correction uses an iterative solution of the light
+                   time equation (see Particulars for details). The solution invoked by
+                   the "LT" option uses one iteration.
+        
+                "LT+S" - Correct for one-way light time and stellar aberration using a
+                   Newtonian formulation. This option modifies the position obtained with
+                   the "LT" option to account for the observer's velocity relative to
+                   the solar system barycenter. The result is the apparent position of
+                   the target---the position as seen by the observer.
+        
+                "CN" - Converged Newtonian light time correction.  In solving the light
+                   time equation, the "CN" correction iterates until the solution
+                   converges (three iterations on all supported platforms).
+        
+                   The "CN" correction typically does not substantially improve accuracy
+                   because the errors made by ignoring relativistic effects may be larger
+                   than the improvement afforded by obtaining convergence of the light
+                   time solution. The "CN" correction computation also requires a
+                   significantly greater number of CPU cycles than does the one-
+                   iteration light time correction.
+        
+                "CN+S" - Converged Newtonian light time and stellar aberration
+                   corrections.
+        
+             The following values of 'abcorr' apply to the "transmission" case in which
+             photons *depart* from the observer's location at 'et' and arrive at the
+             target's location at the light-time corrected epoch (et + lt):
+        
+                "XLT" - "Transmission" case:  correct for one-way light time using a
+                   Newtonian formulation. This correction yields the position of the
+                   target at the moment it receives photons emitted from the observer's
+                   location at 'et'.
+        
+                "XLT+S" - "Transmission" case:  correct for one-way light time and
+                   stellar aberration using a Newtonian formulation.  This option
+                   modifies the position obtained with the "XLT" option to account for
+                   the observer's velocity relative to the solar system barycenter. The
+                   computed target position indicates the direction that photons emitted
+                   from the observer's location must be "aimed" to hit the target.
+        
+                "XCN" - "Transmission" case:  converged Newtonian light time
+                   correction.
+        
+                "XCN+S" - "Transmission" case: converged Newtonian light time and
+                   stellar aberration corrections.
+        
+           observer (string) - the name of an observing body.  Optionally, you may
+              supply the ID code of the object as an integer string. For example, both
+              "EARTH" and "399" are legitimate strings to supply to indicate the
+              observer is Earth.
+        
+        2 Returns:
+        
+           postarg (3-tuple, floats) - a Cartesian 3-vector representing the position of
+              the target body relative to the specified observer. 'postarg' is corrected
+              for the specified aberrations, and is expressed with respect to the
+              reference frame specified by 'frame'.  The three components of 'postarg'
+              represent the x-, y- and z-components of the target's position.
+        
+              Units are always km.
+        
+              'postarg' points from the observer's location at 'et' to the aberration-
+              corrected location of the target. Note that the sense of this position
+              vector is independent of the direction of radiation travel implied by the
+              aberration correction.
+        
+              Non-inertial frames are treated as follows: letting 'ltcent' be the one-
+              way light time between the observer and the central body associated with
+              the frame, the orientation of the frame is evaluated at (et - ltcent),
+              (et + ltcent), or 'et' depending on whether the requested aberration
+              correction is, respectively, for received radiation, transmitted
+              radiation, or is omitted.  'ltcent' is computed using the method indicated
+              by 'abcorr'.
+        
+          lt (float) - the one-way light time between the observer and target in
+               seconds.  If the target position is corrected for aberrations, then 'lt'
+               is the one-way light time between the observer and the light time
+               corrected target location.
+    
+    <b><a name="str2et">str2et</a>(...)</b>
+        Convert a string representing an epoch to a double precision value
+        representing the number of TDB seconds past the J2000 epoch corresponding to
+        the input epoch.
+        
+        1 Argument:
+          a string representing an epoch.  Virtually all common calendar
+          representations are allowed. You may specify a time string belonging to any
+          of the systems TDB, TDT, UTC.  Moreover, you may specify a time string
+          relative to a specific UTC based time zone.
+        
+          The rules used in the parsing of `str' are spelled out in great detail in
+          the CSPICE routine tpartv
+        
+        1 Return:
+          A double precision number of TDB seconds past the J2000 epoch that
+          corresponds to the input
+    
+    <b><a name="subpnt">subpnt</a>(...)</b>
+        Compute the rectangular coordinates of the sub-observer point on a target
+        body at a specified epoch, optionally corrected for light time and stellar
+        aberration.
+        
+        6 Arguments:
+        
+          1 Method -- is a short string providing parameters defining the computation
+              method to be used.  The supported values of 'method' are listed below.
+              Please note that the colon is a required delimiter; using a blank will
+              not work.
+        
+                'Near point: ellipsoid'  The sub-observer point computation uses a
+                                         triaxial ellipsoid to model the surface of
+                                         the target body. The sub-observer point is
+                                         defined as the nearest point on the target
+                                         relative to the observer.
+        
+                'Intercept: ellipsoid'   The sub-observer point computation uses a
+                                         triaxial ellipsoid to model the surface of
+                                         the target body. The sub-observer point is
+                                         defined as the target surface intercept of
+                                         the line containing the observer and the
+                                         target's center.
+        
+              Neither case nor white space are significant in 'method'. For example,
+              the string  ' nearpoint:ELLIPSOID ' is valid.
+        
+          2 Target -- is the name of the target body. The target body is an 
+              ephemeris object (its trajectory is given by SPK data), and is an
+              extended object.
+        
+              The string 'target' is case-insensitive, and leading and trailing
+              blanks in 'target' are not significant. Optionally, you may supply a
+              string containing the integer ID code for the object. For example both
+              'MOON' and '301' are legitimate strings that indicate the Moon is the
+              target body.
+        
+              When the target body's surface is represented by a tri-axial ellipsoid,
+              this routine assumes that a kernel variable representing the 
+              ellipsoid's radii is present in the kernel pool. Normally the kernel
+              variable would be defined by loading a PCK file.
+        
+          3 ET --  is the epoch of participation of the observer, expressed as
+              ephemeris seconds past J2000 TDB: 'ET' is the epoch at which the
+              observer's state is computed. 
+        
+              When aberration corrections are not used, 'ET' is also the epoch at
+              which the position and orientation of the target body are computed.
+        
+              When aberration corrections are used, the position and orientation of
+              the target body are computed at et-lt or et+lt, where 'lt' is the 
+              one-way light time between the sub-observer point and the observer,
+              and the sign applied to 'lt' depends on the selected correction. See
+              the description of 'abcorr' below for details.
+        
+          4 fixref -- is the name of the body-fixed, body-centered reference frame
+              associated with the target body. The output sub-observer point 'spoint'
+              will be expressed relative to this reference frame. The string 'fixref'
+              is case-insensitive, and leading and trailing blanks in 'fixref' are
+              not significant.
+        
+          5 abcorr -- indicates the aberration corrections to be applied when 
+              computing the target's position and orientation.  For remote sensing
+              applications, where the apparent sub-observer point seen by the
+              observer is desired, normally either of the corrections:
+        
+                'LT+S'
+                'CN+S'
+        
+              should be used. These and the other supported options are described
+              below. 'abcorr' may be any of the following:
+        
+                'NONE' Apply no correction. Return the geometric sub-observer point
+                       on the target body.
+        
+              Let 'lt' represent the one-way light time between the observer and the
+              sub-observer point (note: NOT between the observer and the target
+              body's center).
+        
+              The following values of 'abcorr' apply to the 'reception' case in which
+              photons depart from the sub-observer point's location at the light-time
+              corrected epoch et-lt and *arrive* at the observer's location at 'et':
+        
+                'LT'   Correct for one-way light time (also called 'planetary 
+                       aberration') using a Newtonian formulation. This correction
+                       yields the location of sub-observer point at the moment it
+                       emitted photons arriving at the observer at 'et'.
+        
+                       The light time correction uses an iterative solution of the
+                       light time equation. The solution invoked by the 'LT' option
+                       uses one iteration.
+        
+                       Both the target position as seen by the observer, and rotation
+                       of the target  body, are corrected for light time.
+        
+                'LT+S' Correct for one-way light time and stellar aberration using a
+                       Newtonian formulation.  This option modifies the sub-observer
+                       point obtained with the 'LT' option to account for the
+                       observer's velocity relative to the solar system barycenter.
+                       These corrections yield the apparent sub-observer point.
+        
+                'CN'   Converged Newtonian light time correction. In solving the
+                       light time equation, the 'CN' correction iterates until the
+                       solution converges. Both the position and rotation of the
+                       target body are corrected for light time.
+        
+                'CN+S' Converged Newtonian light time and stellar aberration
+                       corrections. This option produces a solution that is at least
+                       as accurate at that obtainable with the 'LT+S' option. Whether
+                       the 'CN+S' solution is substantially more accurate depends on
+                       the geometry of the participating objects and on the accuracy
+                       of the input data. In all cases this routine will execute more
+                       slowly when a converged solution is computed.
+        
+              The following values of 'abcorr' apply to the 'transmission' case in
+              which photons *depart* from the observer's location at 'et' and arrive
+              at the sub-observer point at the light-time corrected epoch et+lt:
+        
+                'XLT'   'Transmission' case: correct for one-way light time using a
+                        Newtonian formulation. This correction yields the sub-
+                        observer location at the moment it receives photons emitted
+                        from the observer's location at 'et'.
+        
+                        The light time correction uses an iterative solution of the
+                        light time equation. The solution invoked by the 'LT' option
+                        uses one iteration.
+        
+                        Both the target position as seen by the observer, and 
+                        rotation of the target body, are corrected for light time.
+        
+                'XLT+S' 'Transmission' case: correct for one-way light time and
+                        stellar aberration using a Newtonian formulation  This option
+                        modifies the sub-observer point obtained with the 'XLT'
+                        option to account for the observer's velocity relative to the
+                        solar system barycenter.
+        
+                'XCN'   Converged Newtonian light time correction. This is the same
+                        as 'XLT' correction but with further iterations to a
+                        converged Newtonian light time solution.
+        
+                'XCN+S' 'Transmission' case: converged Newtonian light time and
+                        stellar aberration corrections.
+        
+            Neither case nor white space are significant in 'abcorr'. For example,
+            the string: 'Lt + s' is valid.
+        
+          6 obsrvr -- is the name of the observing body. The observing body is an
+              ephemeris object: it typically is a spacecraft, the earth, or a surface
+              point on the earth. 'obsrvr' is case-insensitive, and leading and
+              trailing blanks in 'obsrvr' are not significant. Optionally, you may
+              supply a string containing the integer ID code for the object. For
+              example both 'MOON' and '301' are legitimate strings that indicate the
+              Moon is the observer.
+        
+        3 Return Values
+        
+          1 spoint -- 3-tuple of the sub-observer point on the target body.
+        
+              The sub-observer point is defined either as the point on the target
+              body that is closest to the observer, or the target surface intercept
+              of the line from the observer to the target's center; the input
+              argument 'method' selects the definition to be used.
+        
+              'spoint' is expressed in Cartesian coordinates, relative to the body-
+              fixed target frame designated by 'fixref'. The body-fixed target frame
+              is evaluated at the sub-observer epoch 'trgepc' (see description below).
+        
+              When light time correction is used, the duration of light travel between
+              'spoint' to the observer is considered to be the one way light time.
+        
+              When aberration corrections are used, 'spoint' is computed using target
+              body position and orientation that have been adjusted for the
+              corrections applicable to 'spoint' itself rather than to the target
+              body's center. In particular, if the stellar aberration correction
+              applicable to 'spoint' is represented by a shift vector 's', then the
+              light-time corrected position of the target is shifted by 's' before the
+              sub-observer point is computed.
+        
+              The components of 'spoint' have units of km.
+        
+          2 trgepc -- is the 'sub-observer point epoch.' 'trgepc' is defined as follows:
+        
+              letting 'lt' be the one-way light time between the observer and the
+              sub-observer point, 'trgepc' is the epoch et-lt, et+lt, or 'et' depending
+              on whether the requested aberration correction is, respectively, for
+              received radiation, transmitted radiation, or omitted. 'lt' is computed
+              using the method indicated by 'abcorr'.
+        
+              'trgepc' is expressed as seconds past J2000 TDB.
+        
+          3 srfvec -- is a 3-tuple of the vector from the observer's position at 'et'
+              to the aberration-corrected (or optionally, geometric) position of 
+              'spoint', where the aberration corrections are specified by 'abcorr'.
+              'srfvec' is expressed in the target body-fixed reference frame
+              designated by 'fixref', evaluated at 'trgepc'.
+        
+              The components of 'srfvec' are given in units of km.
+        
+              One can use the CSPICE function vnorm_c to obtain the distance between
+              the observer and 'spoint':
+        
+                 dist = vnorm( srfvec )
+        
+              The observer's position 'obspos', relative to the target body's center,
+              where the center's position is corrected for aberration effects as
+              indicated by 'abcorr', can be computed via the call:
+        
+              vsub( spoint, srfvec, obspos )
+        
+              To transform the vector 'srfvec' to a time-dependent reference frame 
+              'ref' at 'et', a sequence of two frame transformations is required. For
+              example, let 'mfix' and 'mref' be 3x3 matrices respectively describing
+              the target body-fixed to J2000 frame transformation at 'trgepc' and the
+              J2000 to (time-dependent frame) 'ref' transformation at 'et', and let
+              'xform' be the 3x3 matrix representing the composition of 'mref' with
+              'mfix'. Then 'srfvec' can be transformed to the result 'refvec' as
+              follows:
+        
+                 pxform( fixref,  'j2000', trgepc, mfix  )
+                 pxform( 'j2000', ref,     et,     mref  )
+                 mxm   ( mref,    mfix,            xform )
+                 mxv   ( xform,   srfvec,          refvec )
+        
+              The second example in the Examples header section below presents a
+              complete program that demonstrates this procedure.
+    
+    <b><a name="subslr">subslr</a>(...)</b>
+        Compute the rectangular coordinates of the sub-solar point on a target body
+        at a specified epoch, optionally corrected for light time and stellar
+        aberration.
+        
+        NOTE: This funciton is exactly the same as subpnt, only instead of
+              calculating the sub-observer-point the sub-solar-point is calculatied by
+              spice instead.  See detailed notes in the C API docs.
+        
+        6 ARUGMENTS
+          method (string)  Computation method
+          target (string)  Name of target body
+          et     (float)   Epoch in ephemeris seconds past J2000 TDB
+          fixref (string)  Body-fixed, body-centered target body frame
+          abcorr (string)  Aberration correction
+          obsrvr (string)  Name of observing body
+        
+        3 RETURNS
+           spoint (3-tuple, floats)  Sub-solar point on the target body. 
+           trgepc (float)  Sub-solar point epoch. 
+           srfvec (3-tuple, floats)  Vector from observer to sub-solar point.
+    
+    <b><a name="tkvrsn">tkvrsn</a>(...)</b>
+        Given an item such as the Toolkit or an entry point name, return the
+        latest version string.
+        1 Argument:
+          string (optional) - Item for which a version string is desired.
+               Currently, the only item supported is 'toolkit' and it will
+               return the toolkit version number.  Any other item will return
+               'No version found.'
+        1 Return:
+          string - Version info string.
+    
+    <b><a name="unload">unload</a>(...)</b>
+        Unload a particular kernel or all the kernels referenced in a meta-kernel.
+        This function is the inverse of furnsh.
+        1 Argument:
+           string - Name of the kernel or meta-kernel file.
+        Returns: None
+    
+    <b><a name="utc2et">utc2et</a>(...)</b>
+        Convert an input time from Calendar or Julian Date format, UTC, to ephemeris
+        seconds past J2000.
+        1 Argument:
+           string - input time, can be a Calendar or Julian Date, UTC.
+        1 Return:
+           float - Output epoch, ephemeris seconds past J2000.
+    
+    <b><a name="vminus">vminus</a>(...)</b>
+        Negate a double precision 3-dimensional vector.
+        
+        1 Argument:
+           3-tuple - A position vector consiting of three double precision values
+        
+        1 Return:
+           3-tuple - This will be the negation (additive inverse) of V1.  It is a
+              is a 3-dimensional, double precision tuple.
+    
+    <b><a name="vnorm">vnorm</a>(...)</b>
+        Compute the magnitude of a double precision, 3-dimensional vector
+        1 Argument:
+          3-tuple -- A double precision vector
+        1 Return:
+          The function returns the magnitude of v1 calculated in a numerically
+          stable way.
+
+
